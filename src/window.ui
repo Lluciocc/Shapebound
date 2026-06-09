@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+  <template class="ShapeboundWindow" parent="AdwApplicationWindow">
+    <property name="title">Shapebound</property>
+    <property name="default-width">920</property>
+    <property name="default-height">760</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <child type="start">
+              <object class="GtkButton" id="previous_button">
+                <property name="icon-name">go-previous-symbolic</property>
+                <property name="tooltip-text">Previous level</property>
+                <style><class name="flat"/></style>
+              </object>
+            </child>
+            <child type="start">
+              <object class="GtkButton" id="next_button">
+                <property name="icon-name">go-next-symbolic</property>
+                <property name="tooltip-text">Next level</property>
+                <style><class name="flat"/></style>
+              </object>
+            </child>
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
+                <property name="title">Shapebound</property>
+                <property name="subtitle">Drag polyominoes to fill the board</property>
+              </object>
+            </property>
+            <child type="end">
+              <object class="GtkButton" id="check_button">
+                <property name="label">Check</property>
+                <style><class name="suggested-action"/></style>
+              </object>
+            </child>
+            <!-- <child type="end">
+              <object class="GtkButton" id="rotate_button">
+                <property name="icon-name">object-rotate-right-symbolic</property>
+                <property name="tooltip-text">Rotate selected piece</property>
+                <style><class name="flat"/></style>
+              </object>
+            </child> -->
+            <child type="end">
+              <object class="GtkButton" id="reset_button">
+                <property name="icon-name">view-refresh-symbolic</property>
+                <property name="tooltip-text">Reset board</property>
+                <style><class name="flat"/></style>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="primary">True</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="menu-model">primary_menu</property>
+                <style><class name="flat"/></style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="content">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="spacing">22</property>
+            <property name="margin-top">28</property>
+            <property name="margin-bottom">28</property>
+            <property name="margin-start">28</property>
+            <property name="margin-end">28</property>
+            <child>
+              <object class="GtkBox" id="piece_box">
+                <property name="orientation">horizontal</property>
+                <property name="halign">center</property>
+                <property name="spacing">18</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkGrid" id="board_grid">
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="row-spacing">4</property>
+                <property name="column-spacing">4</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="halign">center</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="score_label">
+                    <property name="label">Score 0</property>
+                    <style><class name="caption-heading"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="feedback_label">
+                    <property name="label">Drag a piece, or tap a piece then tap the board.</property>
+                    <style><class name="dim-label"/></style>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">app.shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Shapebound</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

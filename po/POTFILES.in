@@ -1,0 +1,8 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/com.github.Lluciocc.Shapebound.desktop.in
+data/com.github.Lluciocc.Shapebound.metainfo.xml.in
+data/com.github.Lluciocc.Shapebound.gschema.xml
+src/main.py
+src/window.py
+src/window.ui

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Shapebound
+Exec=shapebound
+Icon=com.github.Lluciocc.Shapebound
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=GTK;
+StartupNotify=true
+DBusActivatable=true

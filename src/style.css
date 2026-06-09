@@ -1,0 +1,87 @@
+window {
+  background: @window_bg_color;
+}
+
+.piece-card {
+  min-width: 106px;
+  min-height: 94px;
+  padding: 12px;
+  border-radius: 18px;
+  background: color-mix(in srgb, @window_fg_color 6%, transparent);
+  border: 1px solid color-mix(in srgb, @window_fg_color 10%, transparent);
+  transition: 160ms ease-out;
+}
+
+.piece-card:hover {
+  background: color-mix(in srgb, @accent_bg_color 12%, @window_bg_color);
+}
+
+.piece-card.selected {
+  background: color-mix(in srgb, @accent_bg_color 18%, @window_bg_color);
+  border-color: color-mix(in srgb, @accent_bg_color 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, @accent_bg_color 16%, transparent);
+}
+
+.piece-card.dragging {
+  opacity: 0.70;
+}
+
+.piece-shape {
+  padding: 2px;
+}
+
+.mini-cell {
+  border-radius: 5px;
+  background: @accent_bg_color;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 25%, transparent);
+}
+
+.board-cell {
+  min-width: 66px;
+  min-height: 66px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, @window_fg_color 12%, transparent);
+  transition: 150ms ease-out;
+}
+
+.board-cell.empty {
+  background: color-mix(in srgb, @window_fg_color 8%, @window_bg_color);
+}
+
+.board-cell:hover {
+  background: color-mix(in srgb, @accent_bg_color 12%, @window_bg_color);
+}
+
+.board-cell.wall {
+  background: color-mix(in srgb, @window_fg_color 72%, @window_bg_color);
+  border-color: color-mix(in srgb, @window_fg_color 34%, transparent);
+}
+
+.board-cell.preview-ok {
+  box-shadow: 0 0 0 3px color-mix(in srgb, #57e389 55%, transparent);
+}
+
+.board-cell.preview-bad,
+.board-cell.invalid {
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ff7b63 58%, transparent);
+}
+
+.board-cell.pop {
+  box-shadow: 0 0 0 4px color-mix(in srgb, @accent_bg_color 32%, transparent);
+}
+
+.board-cell.blue { background: #99c1f1; }
+.board-cell.green { background: #8ff0a4; }
+.board-cell.yellow { background: #f9f06b; }
+.board-cell.purple { background: #dc8add; }
+.board-cell.orange { background: #ffbe6f; }
+.board-cell.red { background: #ff7b7b; }
+.board-cell.teal { background: #8ff0e6; }
+
+.success { color: #57e389; }
+.error { color: #ff7b63; }
+
+.board-cell.hover-piece {
+  box-shadow: 0 0 0 3px color-mix(in srgb, @window_fg_color 18%, transparent);
+}
