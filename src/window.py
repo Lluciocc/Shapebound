@@ -82,7 +82,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     next_button = Gtk.Template.Child()
     reset_button = Gtk.Template.Child()
     rotate_button = Gtk.Template.Child()
-    generate_button = Gtk.Template.Child()
     check_button = Gtk.Template.Child()
     piece_box = Gtk.Template.Child()
     board_grid = Gtk.Template.Child()
@@ -157,8 +156,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self.reset_button.connect('clicked', lambda *_: self.reset_board())
         if getattr(self, 'rotate_button', None):
             self.rotate_button.connect('clicked', lambda *_: self.rotate_selected())
-        if getattr(self, 'generate_button', None):
-            self.generate_button.connect('clicked', lambda *_: self.generate_level())
         if getattr(self, 'check_button', None):
             self.check_button.connect('clicked', lambda *_: self.check_board(show_incomplete=True))
         # add scroll controller only if board_grid exists
