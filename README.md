@@ -9,9 +9,10 @@ A game for GNOME.
 ## Goal
 Place the available polyomino pieces to completely fill the board while avoiding walls and blocked spaces. As levels progress, you'll need to carefully combine different shapes and rotations to find the unique solution.
 
-# To-Do
+## To-Do
 - Procedural Level Generation
 - Add a progression system
+- Add a menu for levels
 
 ## Contributing
 
