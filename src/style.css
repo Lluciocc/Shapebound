@@ -2,6 +2,10 @@ window {
   background: @window_bg_color;
 }
 
+.completed-level {
+    background: @accent_bg_color;
+}
+
 .piece-card {
   min-width: 106px;
   min-height: 94px;

@@ -29,33 +29,12 @@ from .data import PIECES, LEVELS
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
 # todo: add procedural levels
-#todo: add a menu (procedural, made by me)
-# todo: add progression
-# 
 
 @dataclass(frozen=True)
 class Piece:
     id: str
     name: str
     cells: frozenset[tuple[int, int]]
-
-
-# those fallbacks are use only in the real json file are missing.... 
-# I mean, they should always be there, but if something goes wrong with the file loading we don't want the whole app to break
-FALLBACK_PIECES = {
-    "square2": {"name": "2 × 2", "shape": [[1, 1], [1, 1]]},
-    "square3": {"name": "3 × 3", "shape": [[1, 1, 1], [1, 1, 1], [1, 1, 1]]},
-    "bar3": {"name": "3 Bar", "shape": [[1, 1, 1]]},
-    "l3": {"name": "Small L", "shape": [[1, 0], [1, 1]]},
-}
-
-FALLBACK_LEVELS = [
-    {"title": "Level 1", "subtitle": "4 × 4 · 2 × 2 blocks", "width": 4, "height": 4, "pieces": ["square2"], "walls": []},
-    {"title": "Level 2", "subtitle": "6 × 6 · 3 × 3 blocks", "width": 6, "height": 6, "pieces": ["square3"], "walls": []},
-    {"title": "Level 3", "subtitle": "6 × 6 · rotations", "width": 6, "height": 6, "pieces": ["square2", "bar3", "l3"], "walls": [[2, 2], [3, 3]]},
-    {"title": "Level 4", "subtitle": "8 × 8 · walls force 2 × 2 blocks", "width": 8, "height": 8, "pieces": ["square3", "square2"], "walls": [[1, 6], [2, 6], [3, 6], [4, 4], [6, 1], [6, 2], [6, 3]]},
-]
-
 
 def project_root() -> Path:
     # simple helper to find the project root from this file
@@ -278,7 +257,9 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             subtitle.set_wrap(True)
             subtitle.set_max_width_chars(24)
 
-            # progress = load_progress_for(index)
+            # if a level has progress, then he is completed
+            if load_progress_for(index):
+                button.add_css_class("completed-level")
 
             # if progress:
             #     progress_label = Gtk.Label(
