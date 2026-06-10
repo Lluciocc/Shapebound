@@ -79,8 +79,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'ShapeboundWindow'
 
     window_title = Gtk.Template.Child()
-    previous_button = Gtk.Template.Child()
-    next_button = Gtk.Template.Child()
     reset_button = Gtk.Template.Child()
     check_button = Gtk.Template.Child()
     piece_box = Gtk.Template.Child()
@@ -131,8 +129,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._load_css()
         self._connect_ui()
         self.main_stack.set_visible_child(self.home_page)
-        self.previous_button.set_visible(False)
-        self.next_button.set_visible(False)
         self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
         self._install_actions()
@@ -169,10 +165,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def _connect_ui(self):
         # connect ui signals, be defensive: template children may be missing
-        if getattr(self, 'previous_button', None):
-            self.previous_button.connect('clicked', lambda *_: self.load_level((self.level_index - 1) % len(self.levels)))
-        if getattr(self, 'next_button', None):
-            self.next_button.connect('clicked', lambda *_: self.load_level((self.level_index + 1) % len(self.levels)))
         if getattr(self, 'reset_button', None):
             self.reset_button.connect('clicked', lambda *_: self.reset_board())
         if getattr(self, 'check_button', None):
@@ -236,8 +228,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
         self.back_button.set_visible(False)
 
-        self.previous_button.set_visible(False)
-        self.next_button.set_visible(False)
         self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
 
@@ -260,8 +250,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
         self.back_button.set_visible(True)
 
-        self.previous_button.set_visible(True)
-        self.next_button.set_visible(True)
         self.check_button.set_visible(True)
         self.reset_button.set_visible(True)
 
@@ -272,8 +260,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
         self.back_button.set_visible(True)
 
-        self.previous_button.set_visible(False)
-        self.next_button.set_visible(False)
         self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
 

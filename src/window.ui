@@ -24,26 +24,6 @@
               </object>
             </child>
 
-            <child type="start">
-              <object class="GtkButton" id="previous_button">
-                <property name="icon-name">go-previous-symbolic</property>
-                <property name="tooltip-text">Previous level</property>
-                <style>
-                  <class name="flat"/>
-                </style>
-              </object>
-            </child>
-
-            <child type="start">
-              <object class="GtkButton" id="next_button">
-                <property name="icon-name">go-next-symbolic</property>
-                <property name="tooltip-text">Next level</property>
-                <style>
-                  <class name="flat"/>
-                </style>
-              </object>
-            </child>
-
             <property name="title-widget">
               <object class="AdwWindowTitle" id="window_title">
                 <property name="title">Shapebound</property>
