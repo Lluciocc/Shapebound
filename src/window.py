@@ -82,13 +82,22 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     previous_button = Gtk.Template.Child()
     next_button = Gtk.Template.Child()
     reset_button = Gtk.Template.Child()
-    rotate_button = Gtk.Template.Child()
     check_button = Gtk.Template.Child()
     piece_box = Gtk.Template.Child()
     board_grid = Gtk.Template.Child()
     score_label = Gtk.Template.Child()
     feedback_label = Gtk.Template.Child()
     record_label = Gtk.Template.Child()
+
+    # menu
+    main_stack = Gtk.Template.Child()
+    back_button = Gtk.Template.Child()
+    campaign_button = Gtk.Template.Child()
+    procedural_button = Gtk.Template.Child()
+    levels_flowbox = Gtk.Template.Child()
+    home_page = Gtk.Template.Child()
+    campaign_page = Gtk.Template.Child()
+    game_page = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -121,8 +130,14 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.victory_dialog_open = False
         self._load_css()
         self._connect_ui()
+        self.main_stack.set_visible_child_name("home")
+        self.back_button.set_visible(False)
+        self.previous_button.set_visible(False)
+        self.next_button.set_visible(False)
+        self.check_button.set_visible(False)
+        self.reset_button.set_visible(False)
         self._install_actions()
-        self.load_level(0)
+        #self.load_level(0)
 
     def _load_piece_library(self):
         data_file = project_root() / 'data' / 'pieces.json'
@@ -161,8 +176,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self.next_button.connect('clicked', lambda *_: self.load_level((self.level_index + 1) % len(self.levels)))
         if getattr(self, 'reset_button', None):
             self.reset_button.connect('clicked', lambda *_: self.reset_board())
-        if getattr(self, 'rotate_button', None):
-            self.rotate_button.connect('clicked', lambda *_: self.rotate_selected())
         if getattr(self, 'check_button', None):
             self.check_button.connect('clicked', lambda *_: self.check_board(show_incomplete=True))
         # add scroll controller only if board_grid exists
@@ -170,6 +183,12 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             scroll = Gtk.EventControllerScroll.new(Gtk.EventControllerScrollFlags.VERTICAL)
             scroll.connect('scroll', self._on_scroll_rotate) # scroll wheel rotates piece while hovering board
             self.board_grid.add_controller(scroll)
+        if getattr(self, 'campaign_button', None):
+            self.campaign_button.connect("clicked", lambda *_: self.show_campaign())
+        if getattr(self, 'procedural_button', None):
+            self.procedural_button.connect("clicked", lambda *_: self.start_procedural())
+        if getattr(self, 'back_button', None):
+            self.back_button.connect("clicked", lambda *_: self.go_back())
        
 
     def _install_actions(self):
@@ -207,9 +226,103 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.rotate_selected(1 if dy > 0 else -1)
         return True
 
+    def go_back(self):
+        current = self.main_stack.get_visible_child_name()
+
+        if current == "game":
+            self.show_campaign()
+            return
+
+        self.main_stack.set_visible_child_name("home")
+
+        self.back_button.set_visible(False)
+
+        self.previous_button.set_visible(False)
+        self.next_button.set_visible(False)
+        self.check_button.set_visible(False)
+        self.reset_button.set_visible(False)
+
+    def _show_wait(self):
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading='Puzzle Complete!',
+            body=f"Coming soon ...",
+        )
+        dialog.add_response('ok', 'OK')
+        dialog.present()
+
+    def start_procedural(self):
+        self._show_wait()
+
+    def start_level(self, index):
+        #self.load_level(index)
+        self.load_level(0)
+
+        self.main_stack.set_visible_child_name("game")
+
+        self.back_button.set_visible(True)
+
+        self.previous_button.set_visible(True)
+        self.next_button.set_visible(True)
+        self.check_button.set_visible(True)
+        self.reset_button.set_visible(True)
+
+    def show_campaign(self):
+        self.build_campaign_page()
+
+        self.main_stack.set_visible_child_name("campaign")
+
+        self.back_button.set_visible(True)
+
+        self.previous_button.set_visible(False)
+        self.next_button.set_visible(False)
+        self.check_button.set_visible(False)
+        self.reset_button.set_visible(False)
+
+    def build_campaign_page(self):
+        self._clear_children(self.levels_flowbox)
+
+        for index, level in enumerate(self.levels):
+
+            button = Gtk.Button()
+            button.add_css_class("card")
+
+            box = Gtk.Box(
+                orientation=Gtk.Orientation.VERTICAL,
+                spacing=6
+            )
+
+            title = Gtk.Label(
+                label=level["title"]
+            )
+
+            progress = load_progress_for(index)
+
+            if progress:
+                subtitle = Gtk.Label(
+                    label=f"Best: {progress['score']}"
+                )
+            else:
+                subtitle = Gtk.Label(
+                    label="Not completed"
+                )
+
+            box.append(title)
+            box.append(subtitle)
+
+            button.set_child(box)
+
+            button.connect(
+                "clicked",
+                lambda _, i=index: self.start_level(i)
+            )
+
+            self.levels_flowbox.append(button)
+
     def load_level(self, index):
         # load a level and reset most of the runtime state
         # keeps UI tidy and predictable when switching levels
+        self.main_stack.set_visible_child_name("game")
         self.victory_dialog_open = False
         self.level_index = index
         self.level = self.levels[index]
