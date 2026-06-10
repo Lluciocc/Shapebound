@@ -130,8 +130,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.victory_dialog_open = False
         self._load_css()
         self._connect_ui()
-        self.main_stack.set_visible_child_name("home")
-        self.back_button.set_visible(False)
+        self.main_stack.set_visible_child(self.home_page)
         self.previous_button.set_visible(False)
         self.next_button.set_visible(False)
         self.check_button.set_visible(False)
@@ -233,7 +232,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self.show_campaign()
             return
 
-        self.main_stack.set_visible_child_name("home")
+        self.main_stack.set_visible_child(self.home_page)
 
         self.back_button.set_visible(False)
 
@@ -255,10 +254,9 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._show_wait()
 
     def start_level(self, index):
-        #self.load_level(index)
-        self.load_level(0)
+        self.load_level(index)
 
-        self.main_stack.set_visible_child_name("game")
+        self.main_stack.set_visible_child(self.game_page)
 
         self.back_button.set_visible(True)
 
@@ -270,7 +268,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def show_campaign(self):
         self.build_campaign_page()
 
-        self.main_stack.set_visible_child_name("campaign")
+        self.main_stack.set_visible_child(self.campaign_page)
 
         self.back_button.set_visible(True)
 
@@ -282,6 +280,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def build_campaign_page(self):
         self._clear_children(self.levels_flowbox)
 
+        # a list of every levels, added dynamically
         for index, level in enumerate(self.levels):
 
             button = Gtk.Button()
@@ -322,7 +321,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def load_level(self, index):
         # load a level and reset most of the runtime state
         # keeps UI tidy and predictable when switching levels
-        self.main_stack.set_visible_child_name("game")
+        self.main_stack.set_visible_child(self.campaign_page)
         self.victory_dialog_open = False
         self.level_index = index
         self.level = self.levels[index]
