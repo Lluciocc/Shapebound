@@ -24,6 +24,7 @@ from pathlib import Path
 
 from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
 from .progress import load_progress_for, save_progress_for
+from .data import PIECES, LEVELS
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
@@ -134,38 +135,14 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._install_actions()
         #self.load_level(0)
 
+    # Those 2 load func was previously loading JSON file....
+    # But honnestly this wasn't really usefull and very clankery..
+    # Storing everything in data.py is exactly what we need.
     def _load_piece_library(self):
-        data_file = project_root() / 'data' / 'pieces.json'
-        data = FALLBACK_PIECES
-        if data_file.exists():
-            try:
-                data = json.loads(data_file.read_text(encoding='utf-8'))
-            except Exception:
-                data = FALLBACK_PIECES
-        # build the piece objects
-        # note: if the json is broken we just use fallback pieces, no crash
-        return {pid: Piece(pid, info.get('name', pid), shape_to_cells(info['shape'])) for pid, info in data.items()}
+        return {pid: Piece(pid, info.get('name', pid), shape_to_cells(info['shape'])) for pid, info in PIECES.items()}
 
     def _load_levels(self):
-        levels = []
-        levels_dir = Path(GLib.get_system_data_dirs()[0]) / "com.github.Lluciocc.Shapebound" / "levels"
-
-        if not levels_dir.exists():
-            levels_dir = project_root() / "levels"
-
-        print(levels_dir)
-
-        if levels_dir.exists():
-            for path in sorted(levels_dir.glob("*.json")):
-                try:
-                    levels.append(
-                        json.loads(path.read_text(encoding="utf-8"))
-                    )
-                except Exception as e:
-                    print(f"Cannot load levels at {path}: {e}")
-                    pass
-
-        return levels
+        return LEVELS
 
     def _load_css(self):
         provider = Gtk.CssProvider()
