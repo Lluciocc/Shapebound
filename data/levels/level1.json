@@ -1,0 +1,14 @@
+{
+  "name": "My ahh level",
+  "width": 8,
+  "height": 8,
+  "pieces": [
+    "square2",
+    "square3"
+  ],
+  "walls": [
+    [2, 4],
+    [4, 3],
+    [3, 3]
+  ]
+}

@@ -147,16 +147,25 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         return {pid: Piece(pid, info.get('name', pid), shape_to_cells(info['shape'])) for pid, info in data.items()}
 
     def _load_levels(self):
-        levels_dir = project_root() / 'data' / 'levels'
         levels = []
+        levels_dir = Path(GLib.get_system_data_dirs()[0]) / "com.github.Lluciocc.Shapebound" / "levels"
+
+        if not levels_dir.exists():
+            levels_dir = project_root() / "levels"
+
+        print(levels_dir)
+
         if levels_dir.exists():
-            for path in sorted(levels_dir.glob('*.json')):
+            for path in sorted(levels_dir.glob("*.json")):
                 try:
-                    levels.append(json.loads(path.read_text(encoding='utf-8')))
-                except Exception:
+                    levels.append(
+                        json.loads(path.read_text(encoding="utf-8"))
+                    )
+                except Exception as e:
+                    print(f"Cannot load levels at {path}: {e}")
                     pass
-        # try to read levels from disk, if nothing found use fallback set
-        return levels or FALLBACK_LEVELS
+
+        return levels
 
     def _load_css(self):
         provider = Gtk.CssProvider()

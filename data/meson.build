@@ -43,4 +43,9 @@ configure_file(
   install_dir: get_option('datadir') / 'dbus-1' / 'services'
 )
 
+install_subdir(
+  'levels',
+  install_dir: get_option('datadir') / meson.project_name()
+)
+
 subdir('icons')
