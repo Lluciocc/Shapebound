@@ -79,7 +79,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="record_label">
-                <property name="label">LALALALALAl</property>
+                <property name="label"></property>
                 <style><class name="dim-label"/></style>
               </object>
             </child>

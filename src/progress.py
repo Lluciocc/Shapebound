@@ -3,6 +3,8 @@ import os
 from datetime import datetime,timezone
 from pathlib import Path
 
+# todo: add a way to clear progress
+
 # this is the most reliable method for me
 def _progress_dir() -> Path:
     base = os.environ.get('XDG_CONFIG_HOME')
@@ -32,6 +34,7 @@ def load_all_progress() -> dict:
 def load_progress_for(level_index: int) -> dict | None:
     print(f"Loading progress for {level_index}...")
     data = load_all_progress()
+    print("Loaded data:", data)
     return data.get(str(level_index))
 
 

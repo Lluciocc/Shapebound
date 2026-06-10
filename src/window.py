@@ -255,20 +255,15 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         # show previous best for this level if present
         try:
             prog = load_progress_for(self.level_index)
+            print("Progress found:", prog)
             if prog:
-                print("A best score has been found")
-                text = f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}"
-                self._set_feedback(text, 'success')
                 if getattr(self, 'record_label', None):
                     try:
-                        self.record_label.set_label(text)
-                        self.record_label.remove_css_class('success')
-                        self.record_label.remove_css_class('error')
-                        self.record_label.add_css_class('success')
+                        self.record_label.set_label(f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}")
                     except Exception:
                         pass
             else:
-                print("No best score found")
+                print("No prog found")
                 if getattr(self, 'record_label', None):
                     try:
                         self.record_label.set_label('')
