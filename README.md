@@ -11,8 +11,6 @@ Place the available polyomino pieces to completely fill the board while avoiding
 
 ## To-Do
 - Procedural Level Generation
-- Add a progression system
-- Add a menu for levels
 
 ## Contributing
 
