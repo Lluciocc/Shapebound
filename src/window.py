@@ -113,6 +113,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.flipped = False
         self.score = 0
         self.moves = 0
+        self.hover_cell = None
         # ensure UI shows current score immediately when a level loads
         try:
             self._update_score()
@@ -332,6 +333,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.undo_stack = []
         self.redo_stack = []
         self.hovered_placement_id = None
+        self.hover_cell = None
+        self.preview_cells = set()
         # set title/subtitle if the header widget exists, otherwise set window title
         title = self.level.get('title', f'Level {index + 1}')
         subtitle = self.level.get('subtitle', 'Fill the board with reusable polyominoes')
@@ -451,7 +454,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.selected_piece_id = piece_id
         self.rotation = 0
         self.flipped = False
-        self._refresh_piece_selection()
+        self._rebuild_selected_preview()
         self._set_feedback('Tap the board to place it. Use Rotate before placing.', None)
 
     def _refresh_piece_selection(self):
@@ -491,9 +494,27 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._rebuild_selected_preview()
         self._set_feedback('Piece flipped.', None)
 
+    def _refresh_hover_preview(self):
+        if self.hover_cell is None:
+            return
+
+        r, c = self.hover_cell
+
+        self._clear_preview()
+        self._clear_hover()
+
+        if (r, c) in self.walls:
+            return
+
+        if self.board[r][c] is not None:
+            self._highlight_piece_at(r, c, True)
+        else:
+            self._show_preview(self.selected_piece_id, self.rotation, r, c, self.flipped)
+
     def _rebuild_selected_preview(self):
         self._build_pieces()
         self._refresh_piece_selection()
+        self._refresh_hover_preview()
 
     def select_relative_piece(self, delta):
         if not self.allowed_piece_ids:
@@ -540,26 +561,32 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def _on_cell_pressed(self, gesture, n_press, _x, _y, r, c):
         button = gesture.get_current_button()
-        # debug: log click info to help diagnose why clicks may not place pieces
-        try:
-            print(f"_on_cell_pressed: btn={button} n_press={n_press} r={r} c={c} selected={self.selected_piece_id}")
-        except Exception:
-            pass
+
         if button == 3 or n_press >= 2:
             self.remove_piece_at(r, c)
+            GLib.idle_add(self._refresh_hover_preview)
             return
+
         if self.board[r][c] is not None:
             self.remove_piece_at(r, c)
+            GLib.idle_add(self._refresh_hover_preview)
             return
+
         self.place_piece(self.selected_piece_id, self.rotation, r, c, self.flipped)
 
     def _on_cell_enter(self, _motion, _x, _y, r, c):
+        self.hover_cell = (r, c)
+
         if self.board[r][c] is not None:
+            self._clear_preview()
             self._highlight_piece_at(r, c, True)
         else:
+            self._clear_hover()
             self._show_preview(self.selected_piece_id, self.rotation, r, c, self.flipped)
 
+
     def _on_cell_leave(self, *_args):
+        self.hover_cell = None
         self._clear_preview()
         self._clear_hover()
 
@@ -694,24 +721,32 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         return True
 
     def remove_piece_at(self, r, c):
-        # debug: log removal attempts to help trace issue
-        try:
-            print(f"remove_piece_at: target=({r},{c}) board_has={self.board[r][c]}")
-        except Exception:
-            pass
         placement_id = self.board[r][c]
+
         if placement_id is None:
             return
+
+        self._clear_preview()
+        self._clear_hover()
         self._push_undo_state()
-        cells = self.placements.get(placement_id, {}).get('cells', set())
+
+        cells = set(self.placements.get(placement_id, {}).get('cells', set()))
+
         for cr, cc in cells:
             self.board[cr][cc] = None
-            self._refresh_cell(cr, cc)
+
         self.placements.pop(placement_id, None)
+
+        for cr, cc in cells:
+            self._refresh_cell(cr, cc)
+
+        self.hovered_placement_id = None
         self.moves += 1
         self.score = max(0, self.score - len(cells) * 4)
+
         self._update_score()
         self._set_feedback('Piece removed.', None)
+        GLib.idle_add(self._refresh_hover_preview)
 
     def remove_hovered_piece(self):
         try:
