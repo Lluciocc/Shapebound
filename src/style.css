@@ -85,3 +85,9 @@ window {
 .board-cell.hover-piece {
   box-shadow: 0 0 0 3px color-mix(in srgb, @window_fg_color 18%, transparent);
 }
+
+.level-card {
+  min-width: 220px;
+  min-height: 150px;
+  padding: 18px;
+}

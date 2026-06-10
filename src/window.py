@@ -244,7 +244,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def _show_wait(self):
         dialog = Adw.MessageDialog(
             transient_for=self,
-            heading='Puzzle Complete!',
+            heading="Coming soon ...",
             body=f"Coming soon ...",
         )
         dialog.add_response('ok', 'OK')
@@ -280,34 +280,52 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def build_campaign_page(self):
         self._clear_children(self.levels_flowbox)
 
-        # a list of every levels, added dynamically
         for index, level in enumerate(self.levels):
-
             button = Gtk.Button()
             button.add_css_class("card")
+            button.add_css_class("level-card")
+            button.set_focusable(True)
+            button.set_size_request(220, 150)
 
             box = Gtk.Box(
                 orientation=Gtk.Orientation.VERTICAL,
-                spacing=6
+                spacing=8
             )
+            box.set_halign(Gtk.Align.CENTER)
+            box.set_valign(Gtk.Align.CENTER)
 
-            title = Gtk.Label(
-                label=level["title"]
-            )
+            title = Gtk.Label(label=level.get("title", f"Level {index + 1}")) # having a fallback
+            title.add_css_class("title-3")
+            title.set_halign(Gtk.Align.CENTER)
 
-            progress = load_progress_for(index)
+            subtitle_text = level.get("subtitle", "")
+            subtitle = Gtk.Label(label=subtitle_text)
+            subtitle.add_css_class("dim-label")
+            subtitle.set_halign(Gtk.Align.CENTER)
+            subtitle.set_wrap(True)
+            subtitle.set_max_width_chars(24)
 
-            if progress:
-                subtitle = Gtk.Label(
-                    label=f"Best: {progress['score']}"
-                )
-            else:
-                subtitle = Gtk.Label(
-                    label="Not completed"
-                )
+            # progress = load_progress_for(index)
+
+            # if progress:
+            #     progress_label = Gtk.Label(
+            #         label=f"Best: {progress.get('score', 0)} · {progress.get('moves', 0)} moves"
+            #     )
+            #     progress_label.add_css_class("caption")
+            #     progress_label.add_css_class("success")
+            # else:
+            #     progress_label = Gtk.Label(label="Not completed")
+            #     progress_label.add_css_class("caption")
+            #     progress_label.add_css_class("dim-label")
+
+            # progress_label.set_halign(Gtk.Align.CENTER)
 
             box.append(title)
-            box.append(subtitle)
+
+            if subtitle_text:
+                box.append(subtitle)
+
+            # box.append(progress_label)
 
             button.set_child(box)
 
