@@ -16,6 +16,14 @@ Place the available polyomino pieces to completely fill the board while avoiding
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+## Donate 
+If you like my work, please consider buying me a coffee :)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L01E41M0)
+<a href="https://buymeacoffee.com/lluciocc" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="50">
+</a>
+
 ## License
 
 [GNU General Public License 3 or later](https://www.gnu.org/licenses/gpl-3.0.en.html)

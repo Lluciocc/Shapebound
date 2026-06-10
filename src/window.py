@@ -910,9 +910,9 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def _on_victory_response(self, _dialog, response):
         self.victory_dialog_open = False
         if response == 'restart':
-            self.load_level(self.level_index)
+            self.start_level(self.level_index)
         else:
-            self.load_level((self.level_index + 1) % len(self.levels))
+            self.start_level((self.level_index + 1) % len(self.levels))
 
     def _update_score(self):
         self.score_label.set_label(f'Score {self.score} · Moves {self.moves}')
