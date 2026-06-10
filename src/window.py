@@ -88,6 +88,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     board_grid = Gtk.Template.Child()
     score_label = Gtk.Template.Child()
     feedback_label = Gtk.Template.Child()
+    record_label = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -104,6 +105,11 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.flipped = False
         self.score = 0
         self.moves = 0
+        # ensure UI shows current score immediately when a level loads
+        try:
+            self._update_score()
+        except Exception:
+            pass
         self.next_placement_id = 1
         self.board = []
         self.buttons = {}
@@ -250,8 +256,25 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         try:
             prog = load_progress_for(self.level_index)
             if prog:
-                self._set_feedback(f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}", 'success')
-        except Exception:
+                print("A best score has been found")
+                text = f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}"
+                self._set_feedback(text, 'success')
+                if getattr(self, 'record_label', None):
+                    try:
+                        self.record_label.set_label(text)
+                        self.record_label.remove_css_class('success')
+                        self.record_label.remove_css_class('error')
+                        self.record_label.add_css_class('success')
+                    except Exception:
+                        pass
+            else:
+                print("No best score found")
+                if getattr(self, 'record_label', None):
+                    try:
+                        self.record_label.set_label('')
+                    except Exception:
+                        pass
+        except Exception as e:
             pass
 
     def generate_level(self):
@@ -755,7 +778,16 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._update_score()
         try:
             # persist result (store best score / best moves)
-            save_progress_for(self.level_index, self.score, self.moves)
+            updated = save_progress_for(self.level_index, self.score, self.moves)
+            if updated and getattr(self, 'record_label', None):
+                try:
+                    text = f"Best: Score {self.score} · Moves {self.moves}"
+                    self.record_label.set_label(text)
+                    self.record_label.remove_css_class('success')
+                    self.record_label.remove_css_class('error')
+                    self.record_label.add_css_class('success')
+                except Exception:
+                    pass
         except Exception:
             pass
         self._set_feedback('Solved. Every free cell is filled.', 'success')

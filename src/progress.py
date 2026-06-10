@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime,timezone
 from pathlib import Path
 
 # this is the most reliable method for me
@@ -20,10 +20,12 @@ def _progress_file() -> Path:
 def load_all_progress() -> dict:
     path = _progress_file()
     if not path.exists():
+        print(f"{path} does not exist" )
         return {}
     try:
         return json.loads(path.read_text(encoding='utf-8'))
-    except Exception:
+    except Exception as e:
+        print("Error when loading all progress " + e)
         return {}
 
 
@@ -33,14 +35,14 @@ def load_progress_for(level_index: int) -> dict | None:
     return data.get(str(level_index))
 
 
-def save_progress_for(level_index: int, score: int, moves: int) -> None:
+def save_progress_for(level_index: int, score: int, moves: int) -> bool:
     print(f"Saving progress for {level_index}...")
     d = _progress_dir()
     d.mkdir(parents=True, exist_ok=True)
     p = _progress_file()
     data = load_all_progress()
     key = str(level_index)
-    now = datetime.now(datetime.timezone.utc).isoformat() + 'Z'
+    now = datetime.now(timezone.utc).isoformat()
     existing = data.get(key)
     # update only if new result is better or no existing
     update = False
@@ -55,6 +57,8 @@ def save_progress_for(level_index: int, score: int, moves: int) -> None:
         except Exception:
             update = True
     if update:
+        print(f"Writing progress to {p}")
+
         data[key] = {
             'completed': True,
             'score': int(score),
@@ -64,4 +68,8 @@ def save_progress_for(level_index: int, score: int, moves: int) -> None:
 
         tmp = p.with_suffix('.tmp')
         tmp.write_text(json.dumps(data, indent=2), encoding='utf-8')
+        print(f"Temporary file written: {tmp}")
+
         tmp.replace(p)
+        print(f"Final file written: {p}")
+    return update

@@ -78,6 +78,12 @@
               </object>
             </child>
             <child>
+              <object class="GtkLabel" id="record_label">
+                <property name="label">LALALALALAl</property>
+                <style><class name="dim-label"/></style>
+              </object>
+            </child>
+            <child>
               <object class="GtkGrid" id="board_grid">
                 <property name="halign">center</property>
                 <property name="valign">center</property>
