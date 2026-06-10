@@ -30,6 +30,7 @@ shapebound_sources = [
   '__init__.py',
   'main.py',
   'window.py',
+  'progress.py'
 ]
 
 install_data(shapebound_sources, install_dir: moduledir)

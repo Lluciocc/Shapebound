@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
+from .progress import load_progress_for, save_progress_for
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
@@ -245,6 +246,13 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._build_board()
         self._set_feedback('Drag a piece, or tap a piece then tap the board.', None)
         self._update_score()
+        # show previous best for this level if present
+        try:
+            prog = load_progress_for(self.level_index)
+            if prog:
+                self._set_feedback(f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}", 'success')
+        except Exception:
+            pass
 
     def generate_level(self):
         size = random.choice([6, 8])
@@ -745,6 +753,11 @@ class ShapeboundWindow(Adw.ApplicationWindow):
                 return False
         self.score += 100 # award a small bonus so user sees they solved it
         self._update_score()
+        try:
+            # persist result (store best score / best moves)
+            save_progress_for(self.level_index, self.score, self.moves)
+        except Exception:
+            pass
         self._set_feedback('Solved. Every free cell is filled.', 'success')
         self._show_victory_dialog()
         return True
