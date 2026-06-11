@@ -1,0 +1,21 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:42
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: |
+          dnf install -y meson ninja-build gettext gtk4-devel libadwaita-devel pygobject3-devel
+
+      - run: meson setup build
+
+      - run: meson compile -C build
