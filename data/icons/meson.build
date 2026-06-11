@@ -1,4 +1,4 @@
-application_id = 'com.github.Lluciocc.Shapebound'
+application_id = 'io.github.Lluciocc.Shapebound'
 
 scalable_dir = 'hicolor' / 'scalable' / 'apps'
 install_data(

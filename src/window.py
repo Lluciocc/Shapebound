@@ -54,7 +54,7 @@ def shape_to_cells(shape):
     return frozenset(cells)
 
 
-@Gtk.Template(resource_path='/com/github/Lluciocc/Shapebound/window.ui')
+@Gtk.Template(resource_path='/io/github/Lluciocc/Shapebound/window.ui')
 class ShapeboundWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'ShapeboundWindow'
 
@@ -124,7 +124,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def _load_css(self):
         provider = Gtk.CssProvider()
-        provider.load_from_resource('/com/github/Lluciocc/Shapebound/style.css')
+        provider.load_from_resource('/io/github/Lluciocc/Shapebound/style.css')
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def _connect_ui(self):

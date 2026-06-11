@@ -30,7 +30,7 @@ def _progress_dir() -> Path:
         base_path = Path(base)
     else:
         base_path = Path.home() / '.config'
-    return base_path / 'com.github.Lluciocc.Shapebound'
+    return base_path / 'io.github.Lluciocc.Shapebound'
 
 
 def _progress_file() -> Path:

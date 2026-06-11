@@ -34,9 +34,9 @@ class ShapeboundApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='com.github.Lluciocc.Shapebound',
+        super().__init__(application_id='io.github.Lluciocc.Shapebound',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-                         resource_base_path='/com/github/Lluciocc/Shapebound')
+                         resource_base_path='/io/github/Lluciocc/Shapebound')
         self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
         self.create_action('about', self.on_about_action, ['F1'])
         self.create_action('shortcuts', self.on_shortcuts_action, ['<control>question'])
@@ -56,7 +56,7 @@ class ShapeboundApplication(Adw.Application):
     def on_about_action(self, *args):
         """Callback for the app.about action."""
         about = Adw.AboutDialog(application_name='Shapebound',
-                                application_icon='com.github.Lluciocc.Shapebound',
+                                application_icon='io.github.Lluciocc.Shapebound',
                                 developer_name='Lluciocc',
                                 version='0.1.0',
                                 # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
@@ -70,7 +70,7 @@ class ShapeboundApplication(Adw.Application):
 
     def on_shortcuts_action(self, *args):
         builder = Gtk.Builder.new_from_resource(
-            '/com/github/Lluciocc/Shapebound/shortcuts-dialog.ui'
+            '/io/github/Lluciocc/Shapebound/shortcuts-dialog.ui'
         )
 
         dialog = builder.get_object('shortcuts_dialog')

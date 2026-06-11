@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="shapebound">
-  <schema id="com.github.Lluciocc.Shapebound"
-          path="/com/github/Lluciocc/Shapebound/">
+  <schema id="io.github.Lluciocc.Shapebound"
+          path="/io/github/Lluciocc/Shapebound/">
 
     <key name="window-width" type="i">
       <default>800</default>

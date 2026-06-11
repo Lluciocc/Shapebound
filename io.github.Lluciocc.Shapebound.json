@@ -1,5 +1,5 @@
 {
-    "id" : "com.github.Lluciocc.Shapebound",
+    "id" : "io.github.Lluciocc.Shapebound",
     "runtime" : "org.gnome.Platform",
     "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",

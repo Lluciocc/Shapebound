@@ -2,7 +2,7 @@
 Name=Shapebound
 Comment=Fill the board using reusable polyominoes
 Exec=shapebound
-Icon=com.github.Lluciocc.Shapebound
+Icon=io.github.Lluciocc.Shapebound
 Terminal=false
 Type=Application
 Categories=Game;
