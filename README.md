@@ -3,8 +3,8 @@
 # Shapebound
 
 A game for GNOME.
+<img width="1280" height="1064" alt="Screencast From 2026-06-11 09-46-00" src="https://github.com/user-attachments/assets/d6c47b91-009d-4571-9629-1988e82c3fdf" />
 
-<img width="1940" height="1620" alt="image" src="https://github.com/user-attachments/assets/17949252-dc11-400a-b018-96666483d2fd" />
 
 ## Goal
 Place the available polyomino pieces to completely fill the board while avoiding walls and blocked spaces. As levels progress, you'll need to carefully combine different shapes and rotations to find the unique solution.
