@@ -2,7 +2,7 @@
 
 # Shapebound
 
-A game for GNOME.
+A relaxing polyomino puzzle game for GNOME
 <img width="1280" height="1064" alt="Screencast From 2026-06-11 09-46-00" src="https://github.com/user-attachments/assets/d6c47b91-009d-4571-9629-1988e82c3fdf" />
 
 
