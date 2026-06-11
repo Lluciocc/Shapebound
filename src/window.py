@@ -60,7 +60,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     window_title = Gtk.Template.Child()
     reset_button = Gtk.Template.Child()
-    check_button = Gtk.Template.Child()
     piece_box = Gtk.Template.Child()
     board_grid = Gtk.Template.Child()
     score_label = Gtk.Template.Child()
@@ -110,7 +109,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._load_css()
         self._connect_ui()
         self.main_stack.set_visible_child(self.home_page)
-        self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
         self._install_actions()
         #self.load_level(0)
@@ -133,8 +131,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         # connect ui signals, be defensive: template children may be missing
         if getattr(self, 'reset_button', None):
             self.reset_button.connect('clicked', lambda *_: self.reset_board())
-        if getattr(self, 'check_button', None):
-            self.check_button.connect('clicked', lambda *_: self.check_board(show_incomplete=True))
         # add scroll controller only if board_grid exists
         if getattr(self, 'board_grid', None):
             scroll = Gtk.EventControllerScroll.new(Gtk.EventControllerScrollFlags.VERTICAL)
@@ -190,11 +186,12 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self.show_campaign()
             return
 
+        self.window_title.set_title("Shapebound")
+        self.window_title.set_subtitle("Drag polyominoes to fill the board")
+
         self.main_stack.set_visible_child(self.home_page)
 
         self.back_button.set_visible(False)
-
-        self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
 
     def _show_wait(self):
@@ -215,8 +212,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.main_stack.set_visible_child(self.game_page)
 
         self.back_button.set_visible(True)
-
-        self.check_button.set_visible(True)
         self.reset_button.set_visible(True)
 
     def show_campaign(self):
@@ -225,8 +220,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.main_stack.set_visible_child(self.campaign_page)
 
         self.back_button.set_visible(True)
-
-        self.check_button.set_visible(False)
         self.reset_button.set_visible(False)
 
     def build_campaign_page(self):

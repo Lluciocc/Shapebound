@@ -27,6 +27,7 @@ gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
 from .window import ShapeboundWindow
+from .progress import clear_progress
 
 
 class ShapeboundApplication(Adw.Application):
@@ -39,6 +40,7 @@ class ShapeboundApplication(Adw.Application):
         self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
         self.create_action('about', self.on_about_action, ['F1'])
         self.create_action('shortcuts', self.on_shortcuts_action, ['<control>question'])
+        self.create_action('clear-progress', self.on_clear_progress_action)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -75,6 +77,41 @@ class ShapeboundApplication(Adw.Application):
         dialog.set_transient_for(self.props.active_window)
         dialog.set_modal(True)
         dialog.present()
+
+    def on_clear_progress_action(self, *args):
+        dialog = Adw.MessageDialog(
+            transient_for=self.props.active_window,
+            heading="Clear Progress?",
+            body="This will permanently remove all saved progress."
+        )
+
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("clear", "Clear Progress")
+
+        dialog.set_response_appearance(
+            "clear",
+            Adw.ResponseAppearance.DESTRUCTIVE
+        )
+
+        dialog.connect("response", self._on_clear_progress_response)
+        dialog.present()
+
+    def _on_clear_progress_response(self, dialog, response):
+        if response != "clear":
+            return
+
+        clear_progress()
+
+        win = self.props.active_window
+
+        if win:
+            win.build_campaign_page()
+
+        toast = Adw.Toast(title="Progress cleared")
+        overlay = getattr(win, "toast_overlay", None)
+
+        if overlay:
+            overlay.add_toast(toast)
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.

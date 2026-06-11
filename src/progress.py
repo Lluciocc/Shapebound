@@ -94,3 +94,13 @@ def save_progress_for(level_index: int, score: int, moves: int) -> bool:
         tmp.replace(p)
         print(f"Final file written: {p}")
     return update
+
+def clear_progress():
+    path = _progress_file()
+
+    try:
+        path.unlink(missing_ok=True)
+        return True
+    except Exception as e:
+        print(f"Failed to clear progress: {e}")
+        return False
