@@ -99,7 +99,7 @@ def generate_level(width=8, height=8, wall_count=2):
 
     return { # its json because the window parse json for now
         "title": "My ahh level",
-        "subtitle": "subtitle"
+        "subtitle": "subtitle",
         "width": width,
         "height": height,
         "pieces": [
