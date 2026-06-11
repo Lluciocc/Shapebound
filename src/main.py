@@ -17,6 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# ruff: noqa: E402
+
 import sys
 import gi
 
