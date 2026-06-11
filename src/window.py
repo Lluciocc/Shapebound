@@ -17,7 +17,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import json
 import random
 from dataclasses import dataclass
 from pathlib import Path
@@ -198,7 +197,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         dialog = Adw.MessageDialog(
             transient_for=self,
             heading="Coming soon ...",
-            body=f"Coming soon ...",
+            body="Coming soon ...",
         )
         dialog.add_response('ok', 'OK')
         dialog.present()
@@ -348,7 +347,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
                         self.record_label.set_label('')
                     except Exception:
                         pass
-        except Exception as e:
+        except Exception:
             pass
 
     def generate_level(self):
