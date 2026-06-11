@@ -1,11 +1,10 @@
 {
     "id" : "com.github.Lluciocc.Shapebound",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "48",
+    "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
     "command" : "shapebound",
     "finish-args" : [
-        "--share=network",
         "--share=ipc",
         "--socket=fallback-x11",
         "--device=dri",
@@ -28,10 +27,11 @@
             "builddir" : true,
             "buildsystem" : "meson",
             "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "file:///home/lluciocc/Projects"
-                }
+		{
+		    "type": "git",
+		    "url": "https://github.com/Lluciocc/Shapebound.git",
+		    "commit": "736ebf275131e2cf1c280f2153fa2486d3ce877b"
+		}
             ]
         }
     ]
