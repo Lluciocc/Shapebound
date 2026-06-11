@@ -1,21 +1,63 @@
-name: Build
+name: CI
 
 on:
   push:
   pull_request:
 
 jobs:
-  build:
+  lint:
+    name: Lint Python
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Ruff
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Ruff
+        run: |
+          ruff check .
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+
     container:
       image: fedora:42
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - run: |
-          dnf install -y meson ninja-build gettext gtk4-devel libadwaita-devel pygobject3-devel
+      - name: Install Dependencies
+        run: |
+          dnf install -y \
+            meson \
+            ninja-build \
+            gettext \
+            desktop-file-utils \
+            appstream \
+            gtk4-devel \
+            libadwaita-devel \
+            pygobject3-devel
 
-      - run: meson setup build
+      - name: Configure
+        run: |
+          meson setup build
 
-      - run: meson compile -C build
+      - name: Build
+        run: |
+          meson compile -C build
+
+      - name: Install Test
+        run: |
+          meson install -C build --destdir install-root
