@@ -115,6 +115,8 @@ def generate_level(
     max_placements=8,
     seed=None,
 ):
+    if seed is None:
+        seed = random.getrandbits(64)
     rng = random.Random(seed)
     width = width or rng.choice([6, 7, 8])
     height = height or width
@@ -160,13 +162,13 @@ def generate_level(
         solution = solve_level(level)
 
         if solution and len(solution) >= min_placements:
-            return level
+            return level, seed
 
     raise RuntimeError("Could not generate a solvable procedural level")
 
 
 if __name__ == "__main__":
-    level = generate_level(
+    level, seed = generate_level(
         width=8,
         height=8,
         min_placements=6,

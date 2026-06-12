@@ -187,7 +187,7 @@ def is_solvable(level: dict) -> bool:
 if __name__ == "__main__":
     from .proc import generate_level
 
-    level = generate_level()
+    level, seed = generate_level()
     solution = solve_level(level)
 
     print(level)

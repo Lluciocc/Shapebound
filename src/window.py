@@ -370,8 +370,9 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             pass
 
     def generate_level(self):
-        generated = generate_procedural_level()
+        generated, seed = generate_procedural_level()
         generated["procedural"] = True
+        generated["seed"] = seed
 
         self.levels.append(generated)
         self.load_level(len(self.levels) - 1)
