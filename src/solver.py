@@ -75,12 +75,16 @@ def transformed_cells(
     return tuple(sorted((row - min_row, col - min_col) for row, col in points))
 
 
-def piece_orientations(piece_id: str) -> tuple[tuple[int, bool, tuple[tuple[int, int], ...]], ...]:
+def piece_orientations(
+    piece_id: str,
+    allow_flips: bool = False,
+) -> tuple[tuple[int, bool, tuple[tuple[int, int], ...]], ...]:
     base_cells = shape_to_cells(PIECES[piece_id]["shape"])
     orientations = []
     seen = set()
+    flips = (False, True) if allow_flips else (False,)
 
-    for flipped in (False, True):
+    for flipped in flips:
         for rotation in range(4):
             cells = transformed_cells(base_cells, rotation, flipped)
 
@@ -109,7 +113,10 @@ def _placements_for_level(level: dict) -> tuple[list[Placement], set[tuple[int, 
         if piece_id not in PIECES:
             continue
 
-        for rotation, flipped, shape_cells in piece_orientations(piece_id):
+        for rotation, flipped, shape_cells in piece_orientations(
+            piece_id,
+            allow_flips=level.get("allow_flips", False),
+        ):
             max_row = max(row for row, _ in shape_cells)
             max_col = max(col for _, col in shape_cells)
 
