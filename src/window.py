@@ -82,6 +82,12 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     pieces_label = Gtk.Template.Child()
     copy_seed_button = Gtk.Template.Child()
 
+    # gen from seed
+    seed_button = Gtk.Template.Child()
+    seed_popover = Gtk.Template.Child()
+    seed_entry = Gtk.Template.Child()
+    generate_seed_button = Gtk.Template.Child()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pieces = self._load_piece_library()
@@ -117,6 +123,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.main_stack.set_visible_child(self.home_page)
         self.reset_button.set_visible(False)
         self.info_button.set_visible(False)
+        self.seed_button.set_visible(False)
         self._install_actions()
         self._is_proc = False
         #self.load_level(0)
@@ -151,11 +158,11 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         if getattr(self, 'back_button', None):
             self.back_button.connect("clicked", lambda *_: self.go_back())
         if getattr(self, "copy_seed_button", None):
-            self.copy_seed_button.connect(
-                "clicked",
-                self._on_copy_seed_clicked
-            )
-       
+            self.copy_seed_button.connect("clicked",self._on_copy_seed_clicked)
+        if getattr(self, "generate_seed_button", None):
+            self.generate_seed_button.connect("clicked",self._on_generate_seed_clicked)
+        if getattr(self, "seed_entry", None):
+            self.seed_entry.connect("activate",self._on_generate_seed_clicked)
 
     def _install_actions(self):
         actions = {
@@ -195,6 +202,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def go_back(self):
         self._is_proc = False
         self.info_button.set_visible(False)
+        self.seed_button.set_visible(False)
         self.clear_last_level_proc()
         current = self.main_stack.get_visible_child_name()
 
@@ -242,9 +250,42 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         ):
             self.levels.pop(self.level_index)
 
+    def _on_generate_seed_clicked(self, *_args):
+        text = self.seed_entry.get_text().strip()
+
+        if not text:
+            self._set_feedback("Enter a seed first.", "error")
+            return
+
+        try:
+            seed = int(text)
+        except ValueError:
+            self._set_feedback("Seed must be a number.", "error")
+            return
+
+        self._is_proc = True
+        self.clear_last_level_proc()
+
+        generated, used_seed = generate_procedural_level(seed=seed)
+        generated["procedural"] = True
+        generated["seed"] = used_seed
+
+        self.levels.append(generated)
+        self.load_level(len(self.levels) - 1)
+
+        self.main_stack.set_visible_child(self.game_page)
+        self.back_button.set_visible(True)
+        self.reset_button.set_visible(True)
+
+        self.seed_popover.popdown()
+
+        self._set_feedback(f"Generated from seed {used_seed}.", None)
+
     def start_procedural(self):
         self._is_proc = True
         self.info_button.set_visible(True)
+        self.seed_button.set_visible(True)
+
 
         self.clear_last_level_proc()
 
@@ -264,6 +305,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def show_campaign(self):
         self.info_button.set_visible(False)
+        self.seed_button.set_visible(False)
         self._is_proc = False
         self.build_campaign_page()
 
