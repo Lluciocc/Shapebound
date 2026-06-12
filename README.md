@@ -9,9 +9,6 @@ A relaxing polyomino puzzle game for GNOME
 ## Goal
 Place the available polyomino pieces to completely fill the board while avoiding walls and blocked spaces. As levels progress, you'll need to carefully combine different shapes and rotations to find the unique solution.
 
-## To-Do
-- Procedural Level Generation
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
