@@ -110,6 +110,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.main_stack.set_visible_child(self.home_page)
         self.reset_button.set_visible(False)
         self._install_actions()
+        self._is_proc = False
         #self.load_level(0)
 
     # Those 2 load func was previously loading JSON file....
@@ -179,6 +180,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         return True
 
     def go_back(self):
+        self._is_proc = False
+        self.clear_last_level_proc()
         current = self.main_stack.get_visible_child_name()
 
         if current == "game":
@@ -202,8 +205,21 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         dialog.add_response('ok', 'OK')
         dialog.present()
 
+    def clear_last_level_proc(self):
+        # delete the old procedural level, IF IT EXIST
+        if (
+            self.level_index < len(self.levels)
+            and self.levels[self.level_index].get("procedural", False)
+        ):
+            self.levels.pop(self.level_index)
+
     def start_procedural(self):
+        self._is_proc = True
+
+        self.clear_last_level_proc()
+
         self.generate_level()
+
         self.main_stack.set_visible_child(self.game_page)
         self.back_button.set_visible(True)
         self.reset_button.set_visible(True)
@@ -217,6 +233,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.reset_button.set_visible(True)
 
     def show_campaign(self):
+        self._is_proc = False
         self.build_campaign_page()
 
         self.main_stack.set_visible_child(self.campaign_page)
@@ -288,7 +305,6 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def load_level(self, index):
         # load a level and reset most of the runtime state
         # keeps UI tidy and predictable when switching levels
-        self.main_stack.set_visible_child(self.campaign_page)
         self.victory_dialog_open = False
         self.level_index = index
         self.level = self.levels[index]
@@ -355,10 +371,11 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def generate_level(self):
         generated = generate_procedural_level()
+        generated["procedural"] = True
+
         self.levels.append(generated)
         self.load_level(len(self.levels) - 1)
-        self._set_feedback('Generated. Fill the board with reusable pieces.', None)
-        # generated levels are appended so user can go back if they want
+        self._set_feedback('Generated.', None)
 
     def _clear_children(self, widget):
         child = widget.get_first_child()
@@ -911,6 +928,9 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         if response == 'restart':
             self.start_level(self.level_index)
         else:
+            if self._is_proc:
+                self.start_procedural()
+                return
             self.start_level((self.level_index + 1) % len(self.levels))
 
     def _update_score(self):
