@@ -60,7 +60,7 @@ class ShapeboundApplication(Adw.Application):
         about = Adw.AboutDialog(application_name='Shapebound',
                                 application_icon='io.github.Lluciocc.Shapebound',
                                 developer_name='Lluciocc',
-                                version='0.1.0',
+                                version='1.1.0',
                                 # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
                                 translator_credits = _('translator-credits'),
                                 developers=['Lluciocc'],
