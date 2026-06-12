@@ -17,13 +17,13 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import random
 from dataclasses import dataclass
 from pathlib import Path
 
 from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
 from .progress import load_progress_for, save_progress_for
 from .data import PIECES, LEVELS
+from .proc import generate_level as generate_procedural_level
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
@@ -203,7 +203,10 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         dialog.present()
 
     def start_procedural(self):
-        self._show_wait()
+        self.generate_level()
+        self.main_stack.set_visible_child(self.game_page)
+        self.back_button.set_visible(True)
+        self.reset_button.set_visible(True)
 
     def start_level(self, index):
         self.load_level(index)
@@ -351,19 +354,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             pass
 
     def generate_level(self):
-        size = random.choice([6, 8])
-        walls = set()
-        if size == 8:
-            for _ in range(random.randint(3, 7)):
-                walls.add((random.randrange(size), random.randrange(size)))
-        generated = {
-            "title": "Generated Puzzle",
-            "subtitle": f"{size} × {size} · generated layout",
-            "width": size,
-            "height": size,
-            "pieces": ["square3", "square2"],
-            "walls": sorted([list(w) for w in walls]),
-        }
+        generated = generate_procedural_level()
         self.levels.append(generated)
         self.load_level(len(self.levels) - 1)
         self._set_feedback('Generated. Fill the board with reusable pieces.', None)

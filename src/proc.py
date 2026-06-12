@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import random
-from .solver import piece_orientations, solve_level # doesn't exist for now
+from .solver import piece_orientations, solve_level
 
 
 PIECE_POOL = [
@@ -38,7 +38,6 @@ PIECE_POOL = [
 
 def _placement_cells(row, col, shape_cells):
     return tuple(sorted((row + dr, col + dc) for dr, dc in shape_cells))
-
 
 def _in_bounds(cells, width, height):
     return all(0 <= row < height and 0 <= col < width for row, col in cells)
@@ -107,7 +106,7 @@ def _build_candidate(width, height, rng, min_placements, max_placements):
 
     return occupied, placed
 
-
+# Generate a level, its random but can be based on a seed
 def generate_level(
     width=None,
     height=None,
