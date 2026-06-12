@@ -75,6 +75,13 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     campaign_page = Gtk.Template.Child()
     game_page = Gtk.Template.Child()
 
+    # info
+    info_button = Gtk.Template.Child()
+    seed_label = Gtk.Template.Child()
+    size_label = Gtk.Template.Child()
+    pieces_label = Gtk.Template.Child()
+    copy_seed_button = Gtk.Template.Child()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pieces = self._load_piece_library()
@@ -109,6 +116,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._connect_ui()
         self.main_stack.set_visible_child(self.home_page)
         self.reset_button.set_visible(False)
+        self.info_button.set_visible(False)
         self._install_actions()
         self._is_proc = False
         #self.load_level(0)
@@ -142,6 +150,11 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self.procedural_button.connect("clicked", lambda *_: self.start_procedural())
         if getattr(self, 'back_button', None):
             self.back_button.connect("clicked", lambda *_: self.go_back())
+        if getattr(self, "copy_seed_button", None):
+            self.copy_seed_button.connect(
+                "clicked",
+                self._on_copy_seed_clicked
+            )
        
 
     def _install_actions(self):
@@ -181,6 +194,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def go_back(self):
         self._is_proc = False
+        self.info_button.set_visible(False)
         self.clear_last_level_proc()
         current = self.main_stack.get_visible_child_name()
 
@@ -205,6 +219,21 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         dialog.add_response('ok', 'OK')
         dialog.present()
 
+    def _on_copy_seed_clicked(self, button):
+        seed = str(self.level.get("seed", "N/A"))
+
+        self.get_clipboard().set(seed)
+
+        button.set_icon_name("object-select-symbolic")
+
+        GLib.timeout_add(
+            1500,
+            lambda: (
+                button.set_icon_name("edit-copy-symbolic"),
+                False
+            )[1]
+        )
+
     def clear_last_level_proc(self):
         # delete the old procedural level, IF IT EXIST
         if (
@@ -215,6 +244,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def start_procedural(self):
         self._is_proc = True
+        self.info_button.set_visible(True)
 
         self.clear_last_level_proc()
 
@@ -233,6 +263,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.reset_button.set_visible(True)
 
     def show_campaign(self):
+        self.info_button.set_visible(False)
         self._is_proc = False
         self.build_campaign_page()
 
@@ -302,6 +333,24 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
             self.levels_flowbox.append(button)
 
+    def _update_level_info(self):
+        if not getattr(self, "seed_label", None):
+            return
+
+        seed = self.level.get("seed")
+
+        self.seed_label.set_text(
+            f"Seed: {seed if seed is not None else 'N/A'}"
+        )
+
+        self.size_label.set_text(
+            f"Size: {self.width}×{self.height}"
+        )
+
+        self.pieces_label.set_text(
+            f"Pieces: {len(self.allowed_piece_ids)}"
+        )
+
     def load_level(self, index):
         # load a level and reset most of the runtime state
         # keeps UI tidy and predictable when switching levels
@@ -349,6 +398,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._build_board()
         self._set_feedback('Drag a piece, or tap a piece then tap the board.', None)
         self._update_score()
+        self._update_level_info()
         # show previous best for this level if present
         try:
             prog = load_progress_for(self.level_index)

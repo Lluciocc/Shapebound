@@ -52,6 +52,72 @@
               </object>
             </child>
 
+            <child type="end">
+              <object class="GtkMenuButton" id="info_button">
+                <property name="icon-name">info-outline-symbolic</property>
+                <property name="tooltip-text">Level Information</property>
+
+                <property name="popover">
+                  <object class="GtkPopover">
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+
+                        <property name="margin-top">12</property>
+                        <property name="margin-bottom">12</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Level Information</property>
+                            <style>
+                              <class name="title-4"/>
+                            </style>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">6</property>
+
+                            <child>
+                              <object class="GtkLabel" id="seed_label">
+                                <property name="xalign">0</property>
+                                <property name="hexpand">1</property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkButton" id="copy_seed_button">
+                                <property name="icon-name">edit-copy-symbolic</property>
+                                <property name="tooltip-text">Copy seed</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkLabel" id="size_label">
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkLabel" id="pieces_label">
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+
+                      </object>
+                    </child>
+                  </object>
+                </property>
+
+              </object>
+            </child>
+
           </object>
         </child>
 
