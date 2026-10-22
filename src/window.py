@@ -24,10 +24,11 @@ from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
 from .progress import load_progress_for, save_progress_for
 from .data import PIECES, LEVELS
 from .proc import generate_level as generate_procedural_level
+import time
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
-# todo: add procedural levels
+# todo: add ctrl H for a window in gnome style listing every proc level played with seed, time spent score etc.
 
 @dataclass(frozen=True)
 class Piece:
@@ -126,6 +127,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.seed_button.set_visible(False)
         self._install_actions()
         self._is_proc = False
+        self._timer = 0
         #self.load_level(0)
 
     # Those 2 load func was previously loading JSON file....
@@ -399,6 +401,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.victory_dialog_open = False
         self.level_index = index
         self.level = self.levels[index]
+        self._is_proc = self.level.get('procedural', False)
         self.width = int(self.level.get('width', self.level.get('size', 6)))
         self.height = int(self.level.get('height', self.level.get('size', self.width)))
         self.walls = {tuple(w) for w in self.level.get('walls', [])}
@@ -460,6 +463,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
                         pass
         except Exception:
             pass
+
+        self._timer = time.monotonic() if self._is_proc else 0
 
     def generate_level(self):
         generated, seed = generate_procedural_level()
@@ -907,6 +912,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.next_placement_id = 1
         self._update_score()
         self._set_feedback('Board reset.', None)
+        self._timer = time.monotonic() if self._is_proc else 0
 
     def _snapshot(self):
         return {
@@ -1004,10 +1010,15 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         if self.victory_dialog_open:
             return
         self.victory_dialog_open = True
+        body = f"{self.level.get('title', 'Level')} solved.\nScore: {self.score}\nMoves: {self.moves}"
+        if self._is_proc:
+            elapsed_seconds = max(0, int(time.monotonic() - self._timer))
+            minutes, seconds = divmod(elapsed_seconds, 60)
+            body += f"\nTime: {minutes}m:{seconds:03d}s"
         dialog = Adw.MessageDialog(
             transient_for=self,
             heading='Puzzle Complete!',
-            body=f"{self.level.get('title', 'Level')} solved.\nScore: {self.score}\nMoves: {self.moves}",
+            body=body,
         )
         dialog.add_response('restart', 'Restart')
         dialog.add_response('next', 'Next Level')
