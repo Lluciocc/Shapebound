@@ -17,16 +17,21 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from dataclasses import dataclass
-from pathlib import Path
-from datetime import datetime
-
-from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
-from .progress import (load_progress_for, save_progress_for,
-                       load_procedural_history, save_procedural_history)
-from .data import PIECES, LEVELS
-from .proc import generate_level as generate_procedural_level
 import time
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
+
+from .data import LEVELS, PIECES
+from .proc import generate_level as generate_procedural_level
+from .progress import (
+    load_procedural_history,
+    load_progress_for,
+    save_procedural_history,
+    save_progress_for,
+)
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
 
@@ -106,10 +111,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.moves = 0
         self.hover_cell = None
         # ensure UI shows current score immediately when a level loads
-        try:
-            self._update_score()
-        except Exception:
-            pass
+        self._update_score()
         self.next_placement_id = 1
         self.board = []
         self.buttons = {}
@@ -513,44 +515,21 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         title = self.level.get('title', f'Level {index + 1}')
         subtitle = self.level.get('subtitle', 'Fill the board with reusable polyominoes')
         if getattr(self, 'window_title', None):
-            try:
-                self.window_title.set_title(title)
-                self.window_title.set_subtitle(subtitle)
-            except Exception:
-                # fallback to the window's title if the template child is weird
-                try:
-                    self.set_title(title)
-                except Exception:
-                    pass
+            self.window_title.set_title(title)
+            self.window_title.set_subtitle(subtitle)
         else:
-            try:
-                self.set_title(title)
-            except Exception:
-                pass
+            self.set_title(title)
         self._build_pieces()
         self._build_board()
         self._set_feedback('Drag a piece, or tap a piece then tap the board.', None)
         self._update_score()
         self._update_level_info()
         # show previous best for this level if present
-        try:
-            prog = None if self._is_proc else load_progress_for(self.level_index)
-            print("Progress found:", prog)
-            if prog:
-                if getattr(self, 'record_label', None):
-                    try:
-                        self.record_label.set_label(f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}")
-                    except Exception:
-                        pass
-            else:
-                print("No prog found")
-                if getattr(self, 'record_label', None):
-                    try:
-                        self.record_label.set_label('')
-                    except Exception:
-                        pass
-        except Exception:
-            pass
+        prog = None if self._is_proc else load_progress_for(self.level_index)
+        print("Progress found:", prog)
+        if getattr(self, 'record_label', None):
+            text = f"Best: Score {prog.get('score',0)} · Moves {prog.get('moves',0)}" if prog else ''
+            self.record_label.set_label(text)
 
         self._timer = time.monotonic() if self._is_proc else 0
         self._start_proc_attempt()
@@ -771,7 +750,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             piece_id = parts[0]
             rotation = int(parts[1])
             flipped = bool(int(parts[2])) if len(parts) > 2 else False
-        except Exception:
+        except (AttributeError, IndexError, TypeError, ValueError):
             piece_id, rotation, flipped = self.selected_piece_id, self.rotation, self.flipped
         ok = self.place_piece(piece_id, rotation, r, c, flipped)
         self._clear_preview()
@@ -779,10 +758,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
 
     def _on_board_button_clicked(self, button, r, c):
         # fallback click handler for environments where gesture pressed isn't fired
-        try:
-            print(f"_on_board_button_clicked: r={r} c={c} board={self.board[r][c]} selected={self.selected_piece_id}")
-        except Exception:
-            pass
+        print(f"_on_board_button_clicked: r={r} c={c} board={self.board[r][c]} selected={self.selected_piece_id}")
         if self.board[r][c] is not None:
             self.remove_piece_at(r, c)
             return
@@ -849,20 +825,14 @@ class ShapeboundWindow(Adw.ApplicationWindow):
     def place_piece(self, piece_id, rotation, r, c, flipped=False):
         # main flow for placing a piece
         # debug: log placement attempts
-        try:
-            print(f"place_piece attempt: piece={piece_id} rot={rotation} flipped={flipped} target=({r},{c}) allowed={piece_id in self.allowed_piece_ids}")
-        except Exception:
-            pass
+        print(f"place_piece attempt: piece={piece_id} rot={rotation} flipped={flipped} target=({r},{c}) allowed={piece_id in self.allowed_piece_ids}")
         # check allowed for this level
         if piece_id not in self.allowed_piece_ids:
             self._set_feedback('That piece is not allowed in this level.', 'error')
             return False
         # find best candidate cells near the target click/drop
         cells = self._best_cells_for_target(piece_id, rotation, r, c, flipped)
-        try:
-            print(f" -> candidate cells: {cells} can_place={self._can_place(cells)}")
-        except Exception:
-            pass
+        print(f" -> candidate cells: {cells} can_place={self._can_place(cells)}")
         if not self._can_place(cells):
             # visual pulse + message to explain why it failed
             self._pulse(cells, 'invalid')
@@ -917,10 +887,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         GLib.idle_add(self._refresh_hover_preview)
 
     def remove_hovered_piece(self):
-        try:
-            print(f"remove_hovered_piece: hovered={self.hovered_placement_id}")
-        except Exception:
-            pass
+        print(f"remove_hovered_piece: hovered={self.hovered_placement_id}")
         if self.hovered_placement_id is None or self.hovered_placement_id not in self.placements:
             self._set_feedback('Hover a placed piece, then press Delete to remove it.', 'error')
             return
@@ -1083,17 +1050,15 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             # persist result (store best score / best moves)
             updated = (not self._is_proc and
                        save_progress_for(self.level_index, self.score, self.moves))
-            if updated and getattr(self, 'record_label', None):
-                try:
-                    text = f"Best: Score {self.score} · Moves {self.moves}"
-                    self.record_label.set_label(text)
-                    self.record_label.remove_css_class('success')
-                    self.record_label.remove_css_class('error')
-                    self.record_label.add_css_class('success')
-                except Exception:
-                    pass
-        except Exception:
-            pass
+        except OSError as error:
+            print(f"Failed to save progress: {error}")
+            updated = False
+        if updated and getattr(self, 'record_label', None):
+            text = f"Best: Score {self.score} · Moves {self.moves}"
+            self.record_label.set_label(text)
+            self.record_label.remove_css_class('success')
+            self.record_label.remove_css_class('error')
+            self.record_label.add_css_class('success')
         self._save_proc_attempt(completed=True)
         self._set_feedback('Solved. Every free cell is filled.', 'success')
         self._show_victory_dialog()

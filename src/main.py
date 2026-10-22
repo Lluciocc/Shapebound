@@ -17,19 +17,19 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# ruff: noqa: E402
 
 import sys
-import gi
-
 from gettext import gettext as _
+
+import gi
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
-from gi.repository import Gtk, Gio, Adw
-from .window import ShapeboundWindow
+from gi.repository import Adw, Gio, Gtk
+
 from .progress import clear_progress
+from .window import ShapeboundWindow
 
 
 class ShapeboundApplication(Adw.Application):

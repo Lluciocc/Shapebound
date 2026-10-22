@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import json
 import os
-from datetime import datetime,timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # todo: add a way to clear progress
@@ -43,9 +43,10 @@ def load_all_progress() -> dict:
         print(f"{path} does not exist" )
         return {}
     try:
-        return json.loads(path.read_text(encoding='utf-8'))
-    except Exception as e:
-        print("Error when loading all progress " + e)
+        data = json.loads(path.read_text(encoding='utf-8'))
+        return data if isinstance(data, dict) else {}
+    except (OSError, UnicodeError, json.JSONDecodeError) as e:
+        print(f"Error when loading all progress: {e}")
         return {}
 
 
@@ -53,7 +54,8 @@ def load_progress_for(level_index: int) -> dict | None:
     print(f"Loading progress for {level_index}...")
     data = load_all_progress()
     print("Loaded data:", data)
-    return data.get(str(level_index))
+    progress = data.get(str(level_index))
+    return progress if isinstance(progress, dict) else None
 
 
 def save_progress_for(level_index: int, score: int, moves: int) -> bool:
@@ -63,11 +65,11 @@ def save_progress_for(level_index: int, score: int, moves: int) -> bool:
     p = _progress_file()
     data = load_all_progress()
     key = str(level_index)
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     existing = data.get(key)
     # update only if new result is better or no existing
     update = False
-    if not existing:
+    if not isinstance(existing, dict) or not existing:
         update = True
     else:
         try:
@@ -75,7 +77,7 @@ def save_progress_for(level_index: int, score: int, moves: int) -> bool:
                 update = True
             if moves < int(existing.get('moves', 10**9)):
                 update = True
-        except Exception:
+        except (TypeError, ValueError, OverflowError):
             update = True
     if update:
         print(f"Writing progress to {p}")
@@ -101,7 +103,7 @@ def clear_progress():
     try:
         path.unlink(missing_ok=True)
         return True
-    except Exception as e:
+    except OSError as e:
         print(f"Failed to clear progress: {e}")
         return False
 

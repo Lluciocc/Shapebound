@@ -18,8 +18,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import random
-from .solver import piece_orientations, solve_level
 
+from .solver import piece_orientations, solve_level
 
 PIECE_POOL = [
     "square2",
