@@ -104,6 +104,20 @@
 
             <child>
               <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Save procedural level</property>
+                <property name="accelerator">&lt;Ctrl&gt;S</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Procedural History</property>
+                <property name="accelerator">&lt;Ctrl&gt;H</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes">About</property>
                 <property name="accelerator">F1</property>
               </object>

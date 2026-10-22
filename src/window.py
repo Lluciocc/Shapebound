@@ -19,16 +19,16 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime
 
 from gi.repository import Adw, Gtk, Gdk, GLib, GObject, Gio
-from .progress import load_progress_for, save_progress_for
+from .progress import (load_progress_for, save_progress_for,
+                       load_procedural_history, save_procedural_history)
 from .data import PIECES, LEVELS
 from .proc import generate_level as generate_procedural_level
 import time
 
 COLORS = ["blue", "green", "yellow", "purple", "orange", "red", "teal"]
-
-# todo: add ctrl H for a window in gnome style listing every proc level played with seed, time spent score etc.
 
 @dataclass(frozen=True)
 class Piece:
@@ -128,6 +128,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._install_actions()
         self._is_proc = False
         self._timer = 0
+        self._proc_history = load_procedural_history()
+        self._proc_attempt = None
         #self.load_level(0)
 
     # Those 2 load func was previously loading JSON file....
@@ -178,6 +180,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             'previous-piece': lambda *_: self.select_relative_piece(-1),
             'next-piece': lambda *_: self.select_relative_piece(1),
             'check': lambda *_: self.check_board(show_incomplete=True),
+            'history': lambda *_: self.show_procedural_history(),
+            'save-level': lambda *_: self.save_current_procedural_level(),
         }
         for name, callback in actions.items():
             action = Gio.SimpleAction.new(name, None)
@@ -195,6 +199,90 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             app.set_accels_for_action('win.previous-piece', ['Left'])
             app.set_accels_for_action('win.next-piece', ['Right'])
             app.set_accels_for_action('win.check', ['c'])
+            app.set_accels_for_action('win.history', ['<control>h'])
+            app.set_accels_for_action('win.save-level', ['<control>s'])
+
+    def _start_proc_attempt(self):
+        self._proc_attempt = None
+        if not self._is_proc:
+            return
+        self._proc_attempt = {
+            "seed": self.level.get("seed"),
+            "played_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "width": self.width,
+            "height": self.height,
+            "score": 0,
+            "moves": 0,
+            "seconds": 0,
+            "completed": False,
+        }
+
+    def _save_proc_attempt(self, completed=False):
+        if self._proc_attempt is None:
+            return
+        if self._proc_attempt["completed"]:
+            return
+        self._proc_attempt.update(
+            score=self.score,
+            moves=self.moves,
+            seconds=max(0, int(time.monotonic() - self._timer)),
+            completed=completed,
+        )
+        if not any(attempt is self._proc_attempt for attempt in self._proc_history):
+            self._proc_history.append(self._proc_attempt)
+        save_procedural_history(self._proc_history)
+
+    def save_current_procedural_level(self):
+        if self._proc_attempt is None:
+            self._set_feedback("Start a procedural level to save it.", None)
+            return
+        self._save_proc_attempt()
+        self._set_feedback("Level saved to history.", "success")
+
+    def _replay_proc_attempt(self, _row, attempt, window):
+        self.start_procedural_seed(attempt["seed"])
+        window.close()
+
+    def show_procedural_history(self):
+        window = Adw.Window(
+            title="Procedural History", transient_for=self, modal=True,
+            default_width=560, default_height=600,
+        )
+        toolbar = Adw.ToolbarView()
+        toolbar.add_top_bar(Adw.HeaderBar())
+        window.set_content(toolbar)
+
+        if not self._proc_history:
+            toolbar.set_content(Adw.StatusPage(
+                icon_name="document-open-recent-symbolic",
+                title="No Procedural Levels Yet",
+                description="Win a generated puzzle or press Ctrl+S to save it here.",
+            ))
+        else:
+            group = Adw.PreferencesGroup(title="Saved Levels")
+            for attempt in reversed(self._proc_history):
+                minutes, seconds = divmod(attempt["seconds"], 60)
+                status = "Completed" if attempt["completed"] else "Saved"
+                row = Adw.ActionRow(
+                    title=f"Seed: {attempt['seed']}",
+                    subtitle=(f"{status} · {minutes}m {seconds:02d}s · "
+                              f"Score {attempt['score']} · {attempt['moves']} moves\n"
+                              f"{attempt['width']} × {attempt['height']} · "
+                              f"{datetime.fromisoformat(attempt['played_at']).strftime('%x %X')}"),
+                )
+                row.set_use_markup(False)
+                row.set_activatable(True)
+                row.add_suffix(Gtk.Image(icon_name="media-playback-start-symbolic"))
+                row.connect("activated", self._replay_proc_attempt, attempt, window)
+                group.add(row)
+            clamp = Adw.Clamp(maximum_size=720)
+            clamp.set_child(group)
+            for side in ("top", "bottom", "start", "end"):
+                getattr(clamp, f"set_margin_{side}")(18)
+            scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+            scroll.set_child(clamp)
+            toolbar.set_content(scroll)
+        window.present()
 
     def _on_scroll_rotate(self, _controller, _dx, dy):
         # dy > 0 means scroll down, we map that to rotate direction
@@ -202,6 +290,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         return True
 
     def go_back(self):
+        self._proc_attempt = None
         self._is_proc = False
         self.info_button.set_visible(False)
         self.seed_button.set_visible(False)
@@ -265,22 +354,19 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             self._set_feedback("Seed must be a number.", "error")
             return
 
-        self._is_proc = True
-        self.clear_last_level_proc()
+        self.start_procedural_seed(seed)
+        self.seed_popover.popdown()
 
+    def start_procedural_seed(self, seed):
         generated, used_seed = generate_procedural_level(seed=seed)
         generated["procedural"] = True
         generated["seed"] = used_seed
 
+        self.clear_last_level_proc()
         self.levels.append(generated)
-        self.load_level(len(self.levels) - 1)
-
-        self.main_stack.set_visible_child(self.game_page)
-        self.back_button.set_visible(True)
-        self.reset_button.set_visible(True)
-
-        self.seed_popover.popdown()
-
+        self.start_level(len(self.levels) - 1)
+        self.info_button.set_visible(True)
+        self.seed_button.set_visible(True)
         self._set_feedback(f"Generated from seed {used_seed}.", None)
 
     def start_procedural(self):
@@ -306,6 +392,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self.reset_button.set_visible(True)
 
     def show_campaign(self):
+        self._proc_attempt = None
         self.info_button.set_visible(False)
         self.seed_button.set_visible(False)
         self._is_proc = False
@@ -396,6 +483,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         )
 
     def load_level(self, index):
+        self._proc_attempt = None
         # load a level and reset most of the runtime state
         # keeps UI tidy and predictable when switching levels
         self.victory_dialog_open = False
@@ -446,7 +534,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._update_level_info()
         # show previous best for this level if present
         try:
-            prog = load_progress_for(self.level_index)
+            prog = None if self._is_proc else load_progress_for(self.level_index)
             print("Progress found:", prog)
             if prog:
                 if getattr(self, 'record_label', None):
@@ -465,6 +553,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
             pass
 
         self._timer = time.monotonic() if self._is_proc else 0
+        self._start_proc_attempt()
 
     def generate_level(self):
         generated, seed = generate_procedural_level()
@@ -899,6 +988,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         return GLib.SOURCE_REMOVE
 
     def reset_board(self):
+        self._proc_attempt = None
         self._push_undo_state()
         self.victory_dialog_open = False
         for r in range(self.height):
@@ -913,6 +1003,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._update_score()
         self._set_feedback('Board reset.', None)
         self._timer = time.monotonic() if self._is_proc else 0
+        self._start_proc_attempt()
 
     def _snapshot(self):
         return {
@@ -990,7 +1081,8 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         self._update_score()
         try:
             # persist result (store best score / best moves)
-            updated = save_progress_for(self.level_index, self.score, self.moves)
+            updated = (not self._is_proc and
+                       save_progress_for(self.level_index, self.score, self.moves))
             if updated and getattr(self, 'record_label', None):
                 try:
                     text = f"Best: Score {self.score} · Moves {self.moves}"
@@ -1002,6 +1094,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
                     pass
         except Exception:
             pass
+        self._save_proc_attempt(completed=True)
         self._set_feedback('Solved. Every free cell is filled.', 'success')
         self._show_victory_dialog()
         return True
@@ -1014,7 +1107,7 @@ class ShapeboundWindow(Adw.ApplicationWindow):
         if self._is_proc:
             elapsed_seconds = max(0, int(time.monotonic() - self._timer))
             minutes, seconds = divmod(elapsed_seconds, 60)
-            body += f"\nTime: {minutes}m:{seconds:03d}s"
+            body += f"\nTime: {minutes}m:{seconds:02d}s"
         dialog = Adw.MessageDialog(
             transient_for=self,
             heading='Puzzle Complete!',

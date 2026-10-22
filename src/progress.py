@@ -104,3 +104,38 @@ def clear_progress():
     except Exception as e:
         print(f"Failed to clear progress: {e}")
         return False
+
+
+def load_procedural_history() -> list:
+    path = _progress_dir() / 'procedural-history.json'
+    try:
+        history = json.loads(path.read_text(encoding='utf-8'))
+        if not isinstance(history, list):
+            return []
+        valid = []
+        for entry in history:
+            try:
+                if (not isinstance(entry, dict)
+                        or not all(isinstance(entry.get(key), int)
+                                   for key in ('seed', 'width', 'height', 'score',
+                                               'moves', 'seconds'))
+                        or not isinstance(entry.get('completed'), bool)):
+                    continue
+                datetime.fromisoformat(entry['played_at'])
+            except (KeyError, TypeError, ValueError):
+                continue
+            valid.append(entry)
+        return valid
+    except (OSError, ValueError):
+        return []
+
+
+def save_procedural_history(history: list):
+    path = _progress_dir() / 'procedural-history.json'
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix('.tmp')
+        tmp.write_text(json.dumps(history, indent=2), encoding='utf-8')
+        tmp.replace(path)
+    except OSError as error:
+        print(f"Failed to save procedural history: {error}")
